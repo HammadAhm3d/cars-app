@@ -1,50 +1,59 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
-import { Button, HelperText, Text, TextInput } from "react-native-paper";
-import { useForm, Controller } from "react-hook-form";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
-import { useNavigation } from "@react-navigation/native";
 import { StackScreenProps } from "@react-navigation/stack";
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { Button, HelperText, Text, TextInput } from "react-native-paper";
+import { useAppDispatch, useAppSelector } from "../redux";
+import { login } from "../redux/slices/auth";
 import { RootStackParamList } from "../types";
 
 interface LoginFormData {
-  username: string;
+  email: string;
   password: string;
 }
 type LoginProps = StackScreenProps<RootStackParamList, "Login">;
 const Login = ({ navigation }: LoginProps) => {
+  const dispatch = useAppDispatch();
+  const { isLoading, error, isAuthenticated } = useAppSelector(
+    (state) => state.auth
+  );
+
   const { control, handleSubmit } = useForm<LoginFormData>();
   const onSubmit = (data: LoginFormData) => {
-    console.log(data);
+    dispatch(login(data));
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps={"never"}
+    >
       <Controller
         control={control}
         render={({
           field: { onChange, onBlur, value },
           fieldState: { error, invalid },
         }) => (
-          <>
+          <View style={styles.input}>
             <TextInput
-              label="Username"
+              label="Email"
               mode="outlined"
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
-              style={styles.input}
+              keyboardType="email-address"
               error={invalid}
+              placeholder={"user@example.com"}
             />
             {invalid && (
               <HelperText type="error" visible={invalid}>
                 {error?.message}
               </HelperText>
             )}
-          </>
+          </View>
         )}
-        name="username"
-        rules={{ required: "Username is required" }}
+        name="email"
+        rules={{ required: "Invalid email address", pattern: /^\S+@\S+$/i }}
         defaultValue=""
       />
       <Controller
@@ -53,7 +62,7 @@ const Login = ({ navigation }: LoginProps) => {
           field: { onChange, onBlur, value },
           fieldState: { error, invalid },
         }) => (
-          <>
+          <View style={styles.input}>
             <TextInput
               label="Password"
               mode="outlined"
@@ -61,7 +70,6 @@ const Login = ({ navigation }: LoginProps) => {
               onChangeText={onChange}
               value={value}
               secureTextEntry
-              style={styles.input}
               error={invalid}
             />
             {invalid && (
@@ -69,7 +77,7 @@ const Login = ({ navigation }: LoginProps) => {
                 {error?.message}
               </HelperText>
             )}
-          </>
+          </View>
         )}
         name="password"
         rules={{ required: "Password is required" }}
@@ -89,7 +97,12 @@ const Login = ({ navigation }: LoginProps) => {
       >
         Login
       </Button>
-    </View>
+      {error && (
+        <HelperText type="error" visible={!!error}>
+          {error}
+        </HelperText>
+      )}
+    </ScrollView>
   );
 };
 

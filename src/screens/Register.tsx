@@ -1,45 +1,46 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
-import { Button, HelperText, Text, TextInput } from "react-native-paper";
-import { useForm, Controller } from "react-hook-form";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import { StackScreenProps } from "@react-navigation/stack";
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { Button, HelperText, Text, TextInput } from "react-native-paper";
+import { useAppDispatch } from "../redux";
+import { register } from "../redux/slices/auth";
 import { RootStackParamList } from "../types";
 
 interface RegisterFormData {
   email: string;
-  username: string;
   password: string;
+  confirmPassword: string;
 }
 type RegisterProps = StackScreenProps<RootStackParamList, "Register">;
 
 const Register = ({ navigation }: RegisterProps) => {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<RegisterFormData>();
+  const dispatch = useAppDispatch();
+  const { control, handleSubmit, getValues } = useForm<RegisterFormData>();
 
   const onSubmit = (data: RegisterFormData) => {
-    console.log(data);
+    const { email, password } = data;
+    dispatch(register({ email, password }));
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps={"never"}
+    >
       <Controller
         control={control}
         render={({
           field: { onChange, onBlur, value },
           fieldState: { error, invalid },
         }) => (
-          <>
+          <View style={styles.input}>
             <TextInput
               label="Email"
               mode="outlined"
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
-              style={styles.input}
               keyboardType="email-address"
               error={invalid}
             />
@@ -48,7 +49,7 @@ const Register = ({ navigation }: RegisterProps) => {
                 {error?.message}
               </HelperText>
             )}
-          </>
+          </View>
         )}
         name="email"
         rules={{ required: "Invalid email address", pattern: /^\S+@\S+$/i }}
@@ -60,34 +61,7 @@ const Register = ({ navigation }: RegisterProps) => {
           field: { onChange, onBlur, value },
           fieldState: { error, invalid },
         }) => (
-          <>
-            <TextInput
-              label="Username"
-              mode="outlined"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              style={styles.input}
-              error={invalid}
-            />
-            {invalid && (
-              <HelperText type="error" visible={invalid}>
-                {error?.message}
-              </HelperText>
-            )}
-          </>
-        )}
-        name="username"
-        rules={{ required: "Username is a required field" }}
-        defaultValue=""
-      />
-      <Controller
-        control={control}
-        render={({
-          field: { onChange, onBlur, value },
-          fieldState: { error, invalid },
-        }) => (
-          <>
+          <View style={styles.input}>
             <TextInput
               label="Password"
               mode="outlined"
@@ -95,7 +69,6 @@ const Register = ({ navigation }: RegisterProps) => {
               onChangeText={onChange}
               value={value}
               secureTextEntry
-              style={styles.input}
               error={invalid}
             />
             {invalid && (
@@ -103,13 +76,46 @@ const Register = ({ navigation }: RegisterProps) => {
                 {error?.message}
               </HelperText>
             )}
-          </>
+          </View>
         )}
         name="password"
         rules={{
           required: "Password is a required field",
-          minLength: 6,
-          maxLength: 13,
+          minLength: {
+            value: 8,
+            message: "Password must be at least 8 characters long",
+          },
+        }}
+        defaultValue=""
+      />
+      <Controller
+        control={control}
+        render={({
+          field: { onChange, onBlur, value },
+          fieldState: { invalid },
+        }) => (
+          <View style={styles.input}>
+            <TextInput
+              label="Confirm password"
+              mode="outlined"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+              secureTextEntry
+              error={invalid}
+            />
+            {invalid && (
+              <HelperText type="error" visible={invalid}>
+                Passwords do not match
+              </HelperText>
+            )}
+          </View>
+        )}
+        name="confirmPassword"
+        rules={{
+          required: "Confirm Password is a required field",
+          validate: (value) =>
+            value === getValues("password") || "The passwords do not match",
         }}
         defaultValue=""
       />
@@ -126,7 +132,7 @@ const Register = ({ navigation }: RegisterProps) => {
       >
         Register
       </Button>
-    </View>
+    </ScrollView>
   );
 };
 
