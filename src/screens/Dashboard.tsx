@@ -19,7 +19,6 @@ const Dashboard = ({ navigation }: DashboardProps) => {
       [
         {
           text: "Cancel",
-          onPress: () => Alert.alert("Cancel Pressed"),
           style: "cancel",
         },
         {
