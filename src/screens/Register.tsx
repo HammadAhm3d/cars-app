@@ -26,7 +26,7 @@ const Register = ({ navigation }: RegisterProps) => {
   return (
     <ScrollView
       contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps={"never"}
+      keyboardShouldPersistTaps={"handled"}
     >
       <Controller
         control={control}

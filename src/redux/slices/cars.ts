@@ -52,11 +52,16 @@ const authSlice = createSlice({
       state.cars.push(action.payload);
     },
     updateCar(state, action) {
-      const prev = [...state.cars];
       const { index, ...car } = action.payload;
       state.cars[index] = car;
     },
+    deleteCar(state, action) {
+      const prev = [...state.cars];
+      const { index } = action.payload;
+      prev.splice(index, 1);
+      state.cars = prev;
+    },
   },
 });
-export const { resetState, addCar, updateCar } = authSlice.actions;
+export const { resetState, addCar, updateCar, deleteCar } = authSlice.actions;
 export default authSlice.reducer;

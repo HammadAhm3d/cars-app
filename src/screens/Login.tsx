@@ -26,7 +26,7 @@ const Login = ({ navigation }: LoginProps) => {
   return (
     <ScrollView
       contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps={"never"}
+      keyboardShouldPersistTaps={"handled"}
     >
       <Controller
         control={control}

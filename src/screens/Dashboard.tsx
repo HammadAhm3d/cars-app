@@ -1,16 +1,37 @@
 import { AntDesign } from "@expo/vector-icons";
 import { StackScreenProps } from "@react-navigation/stack";
 import React, { useCallback, useEffect } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { Alert, FlatList, StyleSheet, View } from "react-native";
 import { Button, IconButton, Text } from "react-native-paper";
-import { useAppSelector } from "../redux";
-import { Car } from "../redux/slices/cars";
+import { useAppDispatch, useAppSelector } from "../redux";
+import { Car, deleteCar } from "../redux/slices/cars";
 import { RootStackParamList } from "../types";
 
 type DashboardProps = StackScreenProps<RootStackParamList, "Dashboard">;
 const Dashboard = ({ navigation }: DashboardProps) => {
   const { cars } = useAppSelector((state) => state.cars);
   const { email } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const showAlert = (index: number) => () =>
+    Alert.alert(
+      "Delete this item?",
+      "Are you sure",
+      [
+        {
+          text: "Cancel",
+          onPress: () => Alert.alert("Cancel Pressed"),
+          style: "cancel",
+        },
+        {
+          text: "Yes, delete",
+          onPress: () => dispatch(deleteCar({ index })),
+          style: "default",
+        },
+      ],
+      {
+        cancelable: true,
+      }
+    );
   useEffect(() => navigation.setOptions({ title: email }), []);
   const renderCarItem = useCallback(
     ({ item, index }: { item: Car; index: number }) => {
@@ -19,12 +40,15 @@ const Dashboard = ({ navigation }: DashboardProps) => {
           <Text variant="titleMedium">
             {item.make} - {item.model}
           </Text>
-          <IconButton
-            icon={() => <AntDesign name="edit" size={24} color="black" />}
-            onPress={() =>
-              navigation.navigate("AddEditCar", { index, ...item })
-            }
-          />
+          <View style={styles.row}>
+            <IconButton icon={"delete"} onPress={showAlert(index)} />
+            <IconButton
+              icon={() => <AntDesign name="edit" size={24} color="black" />}
+              onPress={() =>
+                navigation.navigate("AddEditCar", { index, ...item })
+              }
+            />
+          </View>
         </View>
       );
     },
